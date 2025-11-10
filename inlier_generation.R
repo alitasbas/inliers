@@ -63,7 +63,7 @@ compare_dists <- function(main_sample, inliers, ratio=0.1) {
 
 norm_sample <- rnorm(1000, 21, 2.5)
 inliers <- inlier_gen(21, 1.25, 1000, min=20, max=22)
-inliers_akkaya <- inlier_gen_akkaya(norm_sample, ratio = 0.1)
+norm_akkaya_sample <- inlier_gen_akkaya(norm_sample, delta=0.8, ratio = 0.1)
 
 hist(inliers)
 hist(norm_sample)
@@ -74,8 +74,12 @@ compare_dists(norm_sample, inliers, ratio=1/10)
 
 exp_sample <- rexp(1000, rate=1/30)
 inliers <- inlier_gen(30, 1, 1000, min=28, max=31)
+exp_akkaya_sample <- inlier_gen_akkaya(norm_sample, delta=0.8, ratio = 0.1)
 
 hist(inliers)
 hist(exp_sample)
 compare_dists(exp_sample, inliers, ratio=1/15)
+
+
+
 
