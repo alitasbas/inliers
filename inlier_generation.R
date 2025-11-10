@@ -12,12 +12,33 @@ inlier_gen <- function(alpha, beta, n=1000, min, max) {
   return(real_sample)
 }
 
+inlier_gen_akkaya <- function(sample, delta = 0.8, ratio) {
+  n <- round(length(sample) * ratio, 0)
+  xbar <- mean(sample)
+  sigma <- sd(sample)
+  sample <- sort(sample)
+  index <- 1
+  
+  for (i in 1:n) {
+    if(i %% 2 == 1) {
+      index <- i %/% 2 + 1
+      
+    } else {
+      index <- length(sample) - (i/2) + 1
+    }
+    
+    sample[index] <- xbar + (-delta)^i * sigma # ^index or i
+  }
+  
+  return(sample)
+}
+
 compare_dists <- function(main_sample, inliers, ratio=0.1) {
   n <- length(main_sample)
   u <- as.integer(runif(n) > ratio)
   
   print(sum(u))
-  contaminated_sample <- u * main_sample + (1 - u) * inliers # affter this step we lose trace of inlier points
+  contaminated_sample <- u * main_sample + (1 - u) * inliers # after this step we lose trace of inlier points
   
   main_dens <- density(main_sample)
   inlier_dens <- density(inliers)
@@ -42,6 +63,7 @@ compare_dists <- function(main_sample, inliers, ratio=0.1) {
 
 norm_sample <- rnorm(1000, 21, 2.5)
 inliers <- inlier_gen(21, 1.25, 1000, min=20, max=22)
+inliers_akkaya <- inlier_gen_akkaya(norm_sample, ratio = 0.1)
 
 hist(inliers)
 hist(norm_sample)
