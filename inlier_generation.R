@@ -2,10 +2,10 @@ library(dplyr)
 
 set.seed(238)
 
-inlier_gen <- function(alpha, beta, n=1000, min, max) {
-  all_sample <- rnorm(n*100, alpha, beta)
+inlier_gen <- function(mu, sigma, n=1000, min=-Inf, max=Inf) {
+  all_sample <- rnorm(n*100, mu, sigma)
   
-  index <- ifelse(between(all_sample, alpha - beta, alpha + beta) & between(all_sample, min, max), TRUE, FALSE)
+  index <- ifelse(between(all_sample, mu - sigma, mu + sigma) & between(all_sample, min, max), TRUE, FALSE)
   
   real_sample <- sample(all_sample[index], n) # replace = FALSE or TRUE?
   
@@ -33,12 +33,13 @@ inlier_gen_akkaya <- function(sample, delta = 0.8, ratio) {
   return(sample)
 }
 
-compare_dists <- function(main_sample, inliers, ratio=0.1) {
+compare_and_return_dists <- function(main_sample, inliers, ratio=0.1) {
   n <- length(main_sample)
   u <- as.integer(runif(n) > ratio)
   
   print(sum(u))
   contaminated_sample <- u * main_sample + (1 - u) * inliers # after this step we lose trace of inlier points
+  return(contaminated_sample)
   
   main_dens <- density(main_sample)
   inlier_dens <- density(inliers)
@@ -61,8 +62,8 @@ compare_dists <- function(main_sample, inliers, ratio=0.1) {
 
 # Normal Sample
 
-norm_sample <- rnorm(1000, 21, 2.5)
-inliers <- inlier_gen(21, 1.25, 1000, min=20, max=22)
+norm_sample <- rnorm(100, 21, 2.5)
+inliers <- inlier_gen(21, 5, 100, min=15, max=27)
 norm_akkaya_sample <- inlier_gen_akkaya(norm_sample, delta=0.8, ratio = 0.1)
 
 hist(inliers)
@@ -80,6 +81,9 @@ hist(inliers)
 hist(exp_sample)
 compare_dists(exp_sample, inliers, ratio=1/15)
 
+############## NIDA'S SAMPLE
 
+a <- rnorm(1000, 3, 0.4)
+inliers <- inlier_gen(mu = 3.2, sigma = 0.3, n = 1000)
 
-
+compare_dists(a, inliers)
