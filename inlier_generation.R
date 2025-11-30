@@ -1,89 +1,49 @@
-library(dplyr)
+source("utils.R")
 
-set.seed(238)
-
-inlier_gen <- function(mu, sigma, n=1000, min=-Inf, max=Inf) {
-  all_sample <- rnorm(n*100, mu, sigma)
-  
-  index <- ifelse(between(all_sample, mu - sigma, mu + sigma) & between(all_sample, min, max), TRUE, FALSE)
-  
-  real_sample <- sample(all_sample[index], n) # replace = FALSE or TRUE?
-  
-  return(real_sample)
-}
-
-inlier_gen_akkaya <- function(sample, delta = 0.8, ratio) {
-  n <- round(length(sample) * ratio, 0)
-  xbar <- mean(sample)
-  sigma <- sd(sample)
-  sample <- sort(sample)
-  index <- 1
-  
-  for (i in 1:n) {
-    if(i %% 2 == 1) {
-      index <- i %/% 2 + 1
-      
-    } else {
-      index <- length(sample) - (i/2) + 1
-    }
-    
-    sample[index] <- xbar + (-delta)^i * sigma # ^index or i
-  }
-  
-  return(sample)
-}
-
-compare_and_return_dists <- function(main_sample, inliers, ratio=0.1) {
-  n <- length(main_sample)
-  u <- as.integer(runif(n) > ratio)
-  
-  print(sum(u))
-  contaminated_sample <- u * main_sample + (1 - u) * inliers # after this step we lose trace of inlier points
-  return(contaminated_sample)
-  
-  main_dens <- density(main_sample)
-  inlier_dens <- density(inliers)
-  
-  max_y <- max(main_dens$y, inlier_dens$y)
-  
-  par(mfrow=c(1, 2))
-  
-  plot(main_dens, col = "blue", lwd = 2,
-       ylim = c(0, max_y))
-  
-  lines(inlier_dens, col = "red", lwd = 2)
-  # legend("topright", legend = c("normal", "inlier"), col = c("blue", "red"), lwd = 2)
-  
-  plot(density(c(contaminated_sample)), col="red", lwd=2)
-  lines(density(main_sample), col = "blue", lwd = 2)
-  # legend("topright", legend = c("clean", "contaminated"), col = c("blue", "red"), lwd = 2)
-}
+set.seed(499)
 
 
 # Normal Sample
 
-norm_sample <- rnorm(100, 21, 2.5)
-inliers <- inlier_gen(21, 5, 100, min=15, max=27)
-norm_akkaya_sample <- inlier_gen_akkaya(norm_sample, delta=0.8, ratio = 0.1)
+norm_sample <- rnorm(100)
+Nidali_sample <- inject_inlier(norm_sample, 0.5, 0.75, 0.1, min=-0.375, max=0.375)
+akkaya_sample <- generate_contaminated_data(norm_sample, delta = 0.75)
 
-hist(inliers)
 hist(norm_sample)
-compare_dists(norm_sample, inliers, ratio=1/10)
+hist(norm_sample)
+hist(Nidali_sample)
+hist(akkaya_sample)
+compare_dists(norm_sample, Nidali_sample)
+compare_dists(norm_sample, akkaya_sample)
 
 
 # Exp Sample
 
 exp_sample <- rexp(1000, rate=1/30)
-inliers <- inlier_gen(30, 1, 1000, min=28, max=31)
-exp_akkaya_sample <- inlier_gen_akkaya(norm_sample, delta=0.8, ratio = 0.1)
+Nidali_exp_sample <- inject_inlier(exp_sample, 30, 1, 0.1, min=28, max=31.5)
+akkaya_exp_sample <- generate_contaminated_data(exp_sample, delta=0.8)
 
-hist(inliers)
 hist(exp_sample)
-compare_dists(exp_sample, inliers, ratio=1/15)
+hist(exp_sample)
+hist(Nidali_exp_sample)
+hist(akkaya_exp_sample)
+compare_dists(exp_sample, Nidali_exp_sample)
+compare_dists(exp_sample, akkaya_exp_sample)
 
 ############## NIDA'S SAMPLE
 
-a <- rnorm(1000, 3, 0.4)
-inliers <- inlier_gen(mu = 3.2, sigma = 0.3, n = 1000)
+exam_score_df <- read.csv("data/student_exam_scores.csv")
+scores <- exam_score_df$exam_score
 
-compare_dists(a, inliers)
+hist(scores)
+# shapiro.test(exam_score_df$exam_score) # Normal
+
+nidali_contaminated_scores <- inject_inlier(scores, mu=20, sigma = 4, ratio = 0.07, min = 15, max = 25)
+akkaya_contaminated_scores <- generate_contaminated_data(scores, delta = 0.75)
+
+plot(density(scores))
+plot(density(nidali_contaminated_scores))
+plot(density(akkaya_contaminated_scores))
+compare_dists(scores, nidali_contaminated_scores)
+compare_dists(scores, akkaya_contaminated_scores)
+
