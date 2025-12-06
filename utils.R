@@ -3,26 +3,47 @@ library(ggplot2)
 
 # NidAli Inlier Generation
 
-inlier_gen <- function(mu, sigma, n=1000, min=-Inf, max=Inf) {
-  inlier_sample <- rnorm(n*100, mu, sigma)
-  
-  index <- ifelse(between(inlier_sample, mu - sigma, mu + sigma) & between(inlier_sample, min, max), TRUE, FALSE)
-  
-  inlier_sample <- sample(inlier_sample[index], n) # replace = FALSE or TRUE?
-  
-  return(inlier_sample)
-}
+# inlier_gen <- function(mu, sigma, n=1000, min=-Inf, max=Inf) {
+#   inlier_sample <- rnorm(n*100, mu, sigma)
+#   
+#   index <- ifelse(between(inlier_sample, mu - sigma, mu + sigma) & between(inlier_sample, min, max), TRUE, FALSE)
+#   
+#   inlier_sample <- sample(inlier_sample[index], n) # replace = FALSE or TRUE?
+#   
+#   return(inlier_sample)
+# }
 
-inject_inlier <- function(original_data, mu, sigma, ratio=0.1, min=-Inf, max=Inf) {
+# inject_inlier <- function(original_data, mu, sigma, ratio=0.1, min=-Inf, max=Inf) {
+#   n <- length(original_data)
+#   inliers <- inlier_gen(mu, sigma, n, min, max)
+#   
+#   u <- as.integer(runif(n) > ratio)
+#   contaminated_sample <- u * original_data + (1 - u) * inliers # after this step we lose trace of inlier points
+#   
+#   return(contaminated_sample)
+# }
+
+
+inject_inlier <- function(original_data, ratio=0.1) {
   n <- length(original_data)
-  inliers <- inlier_gen(mu, sigma, n, min, max)
+  inlier_count <- n * ratio
+  lower_tenth <- quantile(original_data, 0.05)
+  upper_tenth <- quantile(original_data, 0.95)
+  q1 <- quantile(original_data, 0.25)
+  q3 <- quantile(original_data, 0.75)
+    
+  replicable_sample <- original_data[between(original_data, q1, q3)]
+  left_replacable_sample <- original_data[(original_data < lower_tenth)]
+  right_replacable_sample <- original_data[(original_data > upper_tenth)]
   
-  u <- as.integer(runif(n) > ratio)
-  contaminated_sample <- u * original_data + (1 - u) * inliers # after this step we lose trace of inlier points
+  inliers <- sample(replicable_sample, inlier_count, replace=FALSE)
+  left_replacable_sample[sample(length(left_replacable_sample), inlier_count / 2, replace=FALSE)] <- inliers[1:(inlier_count %/% 2)]
+  right_replacable_sample[sample(length(right_replacable_sample), inlier_count / 2, replace=FALSE)] <- inliers[1:(inlier_count %/% 2)]
+  
+  contaminated_sample <- c(replicable_sample, left_replacable_sample, right_replacable_sample)
   
   return(contaminated_sample)
 }
-
 
 
 # Akkaya Inlier Generation
