@@ -126,15 +126,15 @@ clusters <- function(sample) {
   # }
   
   # Try out 2 for standard normal distributions
-  round_index <- 2
+  round_index <- 3 ## 2
   
   diffs_table <- as.matrix(table(round(diffs, round_index)))
   diffs_table <- as.data.frame(diffs_table)
   diffs_table$difference <- as.double(rownames(diffs_table))
   colnames(diffs_table) <- c("frequency", "difference")
   
-  threshold <- diffs_table[2, 2]
-  binary_diffs <- c(as.integer(diffs <= threshold), 0, 0) # 1 if the distance < threshold
+  # threshold <- diffs_table[2, 2]
+  binary_diffs <- c(as.integer(diffs <= 0.0075), 0, 0) # 1 if the distance < threshold
   
   # Find the number of connected data points
   clusters_df <- data.frame(lower_boundary = numeric(0),
@@ -142,8 +142,8 @@ clusters <- function(sample) {
                             cluster_size = numeric(0))
   c_size <- 0
   next_point_index <- 0
-  for (point_index in 1:(n-1)) {
-    cat("checking index", point_index, "\n")
+  for (point_index in 1:(n-3)) {
+    # cat("checking index", point_index, "\n")
     if (point_index <= next_point_index) {
       next
     }
@@ -151,22 +151,22 @@ clusters <- function(sample) {
     if (binary_diffs[point_index] == 1) {
       
       for (next_point_index in (point_index + 1): (n-1)) {
-        cat("Matched. Now checking trailing indexes", next_point_index: next_point_index + 2, "\n")
+        # cat("Matched. Now checking trailing indexes", next_point_index: next_point_index + 2, "\n")
         
-        print(binary_diffs[next_point_index:(next_point_index + 2)])
-        print(sum(binary_diffs[next_point_index:(next_point_index + 2)]))
+        # print(binary_diffs[next_point_index:(next_point_index + 2)])
+        # print(sum(binary_diffs[next_point_index:(next_point_index + 2)]))
         if (sum(binary_diffs[next_point_index:(next_point_index + 2)]) == 0) {
           
           cluster_boundaries <- c(point_index, (next_point_index))
-          cat("cluster_boundaries: ", cluster_boundaries, "\n")
+          # cat("cluster_boundaries: ", cluster_boundaries, "\n")
           c_size <- sum(binary_diffs[cluster_boundaries[1]: (cluster_boundaries[2]-1)])
           
           if (c_size < 3) {
-            cat("skipped at", point_index, "\n")
+            # cat("skipped at", point_index, "\n")
             
           }
           else {
-            print("Adding to dataframe")
+            # print("Adding to dataframe")
             clusters_df <- add_row(clusters_df, 
                                    lower_boundary=cluster_boundaries[1],
                                    upper_boundary=cluster_boundaries[2],

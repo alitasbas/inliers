@@ -19,11 +19,16 @@ nidali_summary_df <- data.frame(q1 = c(), median = c(),
                          xbar = c(), q3 = c(),
                          kurtosis = c())
 nidali_kurtosis <- c()
+nidali_avg_cluster_size = c()
+nidali_avg_cluster_count = c()
+
 
 norm_summary_df <- data.frame(q1 = c(), median = c(), 
                          xbar = c(), q3 = c(),
                          kurtosis = c())
 norm_kurtosis <- c()
+norm_avg_cluster_size = c()
+norm_avg_cluster_count = c()
 
 for (i in 1:1000) {
   norm_sample <- rnorm(100)
@@ -31,8 +36,13 @@ for (i in 1:1000) {
   
   norm_summary_df <- bind_rows(norm_summary_df, summary(norm_sample))
   norm_kurtosis <- c(norm_kurtosis, kurtosis(norm_sample))
+  norm_avg_cluster_size <- c(norm_avg_cluster_size, mean(clusters(norm_sample)$cluster_size))
+  norm_avg_cluster_count <- c(norm_avg_cluster_count, nrow(clusters(norm_sample)))  
+  
   nidali_summary_df <- bind_rows(nidali_summary_df, summary(nidali_sample))
   nidali_kurtosis <- c(nidali_kurtosis, kurtosis(nidali_sample))
+  nidali_avg_cluster_size <- c(nidali_avg_cluster_size, mean(clusters(nidali_sample)$cluster_size))
+  nidali_avg_cluster_count <- c(nidali_avg_cluster_count, nrow(clusters(nidali_sample)))  
   
 }
 
@@ -42,6 +52,7 @@ akkaya_sample <- generate_contaminated_data(norm_sample, delta = 0.01)
 
 hist(norm_sample, col="lightblue", freq=F)
 lines(density(norm_sample), col="darkmagenta", lwd=3)
+
 
 hist(nidali_sample, col="lightblue", freq=F)
 lines(density(norm_sample), col="darkmagenta", lwd=3)
@@ -59,7 +70,6 @@ sapply(list(norm_sample, nidali_sample, akkaya_sample), kurtosis)
 c_norm <- clusters(norm_sample)
 c_new <- clusters(nidali_sample)
 c_akkaya <- clusters(akkaya_sample)
-
 
 # Exp Sample
 
