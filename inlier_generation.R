@@ -7,23 +7,59 @@ set.seed(499)
 
 
 # Normal Sample
+# lnorm <- list(q1=c(), median = c(), 
+#               xbar = c(), q3 = c(),
+#               kurtosis = c()) 
+# 
+# lnidali <- list(q1 = c(), median = c(), 
+#               xbar = c(), q3 = c(),
+#               kurtosis = c()) 
+
+nidali_summary_df <- data.frame(q1 = c(), median = c(), 
+                         xbar = c(), q3 = c(),
+                         kurtosis = c())
+nidali_kurtosis <- c()
+
+norm_summary_df <- data.frame(q1 = c(), median = c(), 
+                         xbar = c(), q3 = c(),
+                         kurtosis = c())
+norm_kurtosis <- c()
+
+for (i in 1:1000) {
+  norm_sample <- rnorm(100)
+  nidali_sample <- inject_inlier(original_data=norm_sample, 0.1)
+  
+  norm_summary_df <- bind_rows(norm_summary_df, summary(norm_sample))
+  norm_kurtosis <- c(norm_kurtosis, kurtosis(norm_sample))
+  nidali_summary_df <- bind_rows(nidali_summary_df, summary(nidali_sample))
+  nidali_kurtosis <- c(nidali_kurtosis, kurtosis(nidali_sample))
+  
+}
 
 norm_sample <- rnorm(100)
-# Nidali_sample <- inject_inlier(norm_sample, 0.5, 0.75, 0.1, min=-0.375, max=0.375)
-new_sample <- inject_inlier(original_data=norm_sample, 0.1)
+nidali_sample <- inject_inlier(original_data=norm_sample, 0.1)
 akkaya_sample <- generate_contaminated_data(norm_sample, delta = 0.01)
 
-hist(norm_sample)
-# hist(norm_sample)
-hist(new_sample)
-hist(akkaya_sample)
-# compare_dists(norm_sample, Nidali_sample)
-compare_dists(norm_sample, new_sample)
+hist(norm_sample, col="lightblue", freq=F)
+lines(density(norm_sample), col="darkmagenta", lwd=3)
+
+hist(nidali_sample, col="lightblue", freq=F)
+lines(density(norm_sample), col="darkmagenta", lwd=3)
+
+hist(akkaya_sample, col="lightblue", freq=F)
+lines(density(norm_sample), col="darkmagenta", lwd=3)
+
+compare_dists(norm_sample, nidali_sample)
 compare_dists(norm_sample, akkaya_sample)
-sapply(list(norm_sample, new_sample, akkaya_sample), kurtosis)
-kurtosis(norm_sample)
-kurtosis(new_sample)
-kurtosis(akkaya_sample)
+
+# Kurtosis
+sapply(list(norm_sample, nidali_sample, akkaya_sample), kurtosis)
+
+# Clusters
+c_norm <- clusters(norm_sample)
+c_new <- clusters(nidali_sample)
+c_akkaya <- clusters(akkaya_sample)
+
 
 # Exp Sample
 

@@ -27,20 +27,17 @@ library(ggplot2)
 inject_inlier <- function(original_data, ratio=0.1) {
   n <- length(original_data)
   inlier_count <- n * ratio
-  lower_tenth <- quantile(original_data, 0.05)
-  upper_tenth <- quantile(original_data, 0.95)
+  lower_bound <- quantile(original_data, 0.05)
+  upper_bound <- quantile(original_data, 0.95)
   q1 <- quantile(original_data, 0.25)
   q3 <- quantile(original_data, 0.75)
     
+  untouched_sample <- original_data[between(original_data, lower_bound, upper_bound)]
   replicable_sample <- original_data[between(original_data, q1, q3)]
-  left_replacable_sample <- original_data[(original_data < lower_tenth)]
-  right_replacable_sample <- original_data[(original_data > upper_tenth)]
   
   inliers <- sample(replicable_sample, inlier_count, replace=FALSE)
-  left_replacable_sample[sample(length(left_replacable_sample), inlier_count / 2, replace=FALSE)] <- inliers[1:(inlier_count %/% 2)]
-  right_replacable_sample[sample(length(right_replacable_sample), inlier_count / 2, replace=FALSE)] <- inliers[1:(inlier_count %/% 2)]
   
-  contaminated_sample <- c(replicable_sample, left_replacable_sample, right_replacable_sample)
+  contaminated_sample <- c(untouched_sample, inliers)
   
   return(contaminated_sample)
 }
@@ -117,22 +114,26 @@ clusters <- function(sample) {
   
   
   # Find the ideal diff length
-  round_index <- 5
-  for (i in round_index:-5) {
-    if (between(as.matrix(table(round(diffs, i)))[1], 0.08 * n, 0.12 * n)) {
-      
-      round_index <- i
-      print(round_index)
-      break
-    }
-    
-  }
+  # round_index <- 5
+  # for (i in round_index:-5) {
+  #   if (between(as.matrix(table(round(diffs, i)))[1], 0.1 * n, 0.2 * n)) {
+  #     
+  #     round_index <- i
+  #     print(round_index)
+  #     break
+  #   }
+  #   
+  # }
+  
+  # Try out 2 for standard normal distributions
+  round_index <- 2
+  
   diffs_table <- as.matrix(table(round(diffs, round_index)))
   diffs_table <- as.data.frame(diffs_table)
   diffs_table$difference <- as.double(rownames(diffs_table))
   colnames(diffs_table) <- c("frequency", "difference")
   
-  threshold <- diffs_table[3, 2]
+  threshold <- diffs_table[2, 2]
   binary_diffs <- c(as.integer(diffs <= threshold), 0, 0) # 1 if the distance < threshold
   
   # Find the number of connected data points
@@ -150,15 +151,15 @@ clusters <- function(sample) {
     if (binary_diffs[point_index] == 1) {
       
       for (next_point_index in (point_index + 1): (n-1)) {
-        cat("Matched. Now checking trailing indexes", next_point_index, "\n")
+        cat("Matched. Now checking trailing indexes", next_point_index: next_point_index + 2, "\n")
         
         print(binary_diffs[next_point_index:(next_point_index + 2)])
         print(sum(binary_diffs[next_point_index:(next_point_index + 2)]))
         if (sum(binary_diffs[next_point_index:(next_point_index + 2)]) == 0) {
           
-          cluster_boundaries <- c(point_index, (next_point_index - 1))
+          cluster_boundaries <- c(point_index, (next_point_index))
           cat("cluster_boundaries: ", cluster_boundaries, "\n")
-          c_size <- sum(binary_diffs[cluster_boundaries[1]: cluster_boundaries[2]])
+          c_size <- sum(binary_diffs[cluster_boundaries[1]: (cluster_boundaries[2]-1)])
           
           if (c_size < 3) {
             cat("skipped at", point_index, "\n")
