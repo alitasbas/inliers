@@ -134,7 +134,7 @@ clusters <- function(sample) {
   colnames(diffs_table) <- c("frequency", "difference")
   
   # threshold <- diffs_table[2, 2]
-  binary_diffs <- c(as.integer(diffs <= 0.0075), 0, 0) # 1 if the distance < threshold
+  binary_diffs <- c(as.integer(diffs <= 0.015), 0, 0) # 1 if the distance < threshold
   
   # Find the number of connected data points
   clusters_df <- data.frame(lower_boundary = numeric(0),
