@@ -48,12 +48,11 @@ akkaya_summ_list <- vector("list", N)
 for (i in 1:N) {
   
   # --- Generation ---
-  norm_sample <- rnorm(100)
+  norm_sample <- rnorm(200)
   nidali_sample <- inject_inlier(original_data = norm_sample, 0.1)
   akkaya_sample <- generate_contaminated_data(norm_sample, delta = 0.01)
   
   # --- Normal Processing ---
-  # Calculate expensive operations (clusters) ONLY ONCE per iteration
   norm_clust_res <- clusters(norm_sample) 
   
   norm_summ_list[[i]] <- summary(norm_sample)
@@ -70,7 +69,6 @@ for (i in 1:N) {
   nidali_avg_cluster_count[i] <- nrow(nidali_clust_res)
   
   # --- Akkaya Processing ---
-  # (Fixed copy-paste errors from original code here)
   akkaya_clust_res <- clusters(akkaya_sample)
   
   akkaya_summ_list[[i]] <- summary(akkaya_sample)
@@ -78,6 +76,10 @@ for (i in 1:N) {
   akkaya_avg_cluster_size[i] <- mean(akkaya_clust_res$cluster_size)
   akkaya_avg_cluster_count[i] <- nrow(akkaya_clust_res)
 }
+
+norm_summary_df <- bind_rows(norm_summ_list)
+nidali_summary_df <- bind_rows(nidali_summ_list)
+akkaya_summary_df <- bind_rows(akkaya_summ_list)
 
 norm_sample <- rnorm(100)
 nidali_sample <- inject_inlier(original_data=norm_sample, 0.1)
