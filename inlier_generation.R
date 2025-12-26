@@ -9,46 +9,25 @@ N <- 1000
 norm_kurtosis <- numeric(N)
 norm_avg_cluster_size <- numeric(N)
 norm_avg_cluster_count <- numeric(N)
+norm_avg_cluster_length <- numeric(N)
 norm_summ_list <- vector("list", N)
 
 nidali_kurtosis <- numeric(N)
 nidali_avg_cluster_size <- numeric(N)
 nidali_avg_cluster_count <- numeric(N)
+nidali_avg_cluster_length <- numeric(N)
 nidali_summ_list <- vector("list", N)
 
 akkaya_kurtosis <- numeric(N)
 akkaya_avg_cluster_size <- numeric(N)
 akkaya_avg_cluster_count <- numeric(N)
+akkaya_avg_cluster_length <- numeric(N)
 akkaya_summ_list <- vector("list", N)
-
-# nidali_summary_df <- data.frame(q1 = c(), median = c(), 
-#                          xbar = c(), q3 = c(),
-#                          kurtosis = c())
-# nidali_kurtosis <- c()
-# nidali_avg_cluster_size = c()
-# nidali_avg_cluster_count = c()
-# 
-# 
-# norm_summary_df <- data.frame(q1 = c(), median = c(), 
-#                          xbar = c(), q3 = c(),
-#                          kurtosis = c())
-# norm_kurtosis <- c()
-# norm_avg_cluster_size = c()
-# norm_avg_cluster_count = c()
-# 
-# 
-# akkaya_summary_df <- data.frame(q1 = c(), median = c(), 
-#                          xbar = c(), q3 = c(),
-#                          kurtosis = c())
-# akkaya_kurtosis <- c()
-# akkaya_avg_cluster_size = c()
-# akkaya_avg_cluster_count = c()
-
 
 for (i in 1:N) {
   
   # --- Generation ---
-  norm_sample <- rnorm(200)
+  norm_sample <- rnorm(100)
   nidali_sample <- inject_inlier(original_data = norm_sample, 0.1)
   akkaya_sample <- generate_contaminated_data(norm_sample, delta = 0.01)
   
@@ -59,6 +38,7 @@ for (i in 1:N) {
   norm_kurtosis[i] <- kurtosis(norm_sample)
   norm_avg_cluster_size[i] <- mean(norm_clust_res$cluster_size)
   norm_avg_cluster_count[i] <- nrow(norm_clust_res)
+  norm_avg_cluster_length[i] <- mean(norm_clust_res$cluster_length)
   
   # --- Nidali Processing ---
   nidali_clust_res <- clusters(nidali_sample)
@@ -67,6 +47,7 @@ for (i in 1:N) {
   nidali_kurtosis[i] <- kurtosis(nidali_sample)
   nidali_avg_cluster_size[i] <- mean(nidali_clust_res$cluster_size)
   nidali_avg_cluster_count[i] <- nrow(nidali_clust_res)
+  nidali_avg_cluster_length[i] <- mean(nidali_clust_res$cluster_length)
   
   # --- Akkaya Processing ---
   akkaya_clust_res <- clusters(akkaya_sample)
@@ -75,6 +56,7 @@ for (i in 1:N) {
   akkaya_kurtosis[i] <- kurtosis(akkaya_sample)
   akkaya_avg_cluster_size[i] <- mean(akkaya_clust_res$cluster_size)
   akkaya_avg_cluster_count[i] <- nrow(akkaya_clust_res)
+  akkaya_avg_cluster_length[i] <- mean(akkaya_clust_res$cluster_length)
 }
 
 norm_summary_df <- bind_rows(norm_summ_list)
@@ -106,21 +88,86 @@ c_norm <- clusters(norm_sample)
 c_new <- clusters(nidali_sample)
 c_akkaya <- clusters(akkaya_sample)
 
-# Exp Sample
+############## ------EXPONENTIAL DISTRIBUTION--------- ########################
+# Don't mind the variable names. I got lazy to change them
 
-exp_sample <- rexp(1000, rate=1/30)
-Nidali_exp_sample <- inject_inlier(exp_sample, 30, 1, 0.1, min=28, max=31.5)
+set.seed(499)
+
+N <- 1000
+norm_kurtosis <- numeric(N)
+norm_avg_cluster_size <- numeric(N)
+norm_avg_cluster_count <- numeric(N)
+norm_avg_cluster_length <- numeric(N)
+norm_summ_list <- vector("list", N)
+
+nidali_kurtosis <- numeric(N)
+nidali_avg_cluster_size <- numeric(N)
+nidali_avg_cluster_count <- numeric(N)
+nidali_avg_cluster_length <- numeric(N)
+nidali_summ_list <- vector("list", N)
+
+akkaya_kurtosis <- numeric(N)
+akkaya_avg_cluster_size <- numeric(N)
+akkaya_avg_cluster_count <- numeric(N)
+akkaya_avg_cluster_length <- numeric(N)
+akkaya_summ_list <- vector("list", N)
+
+for (i in 1:N) {
+  
+  # --- Generation ---
+  norm_sample <- rexp(100)
+  nidali_sample <- inject_inlier(original_data = norm_sample, 0.1)
+  akkaya_sample <- generate_contaminated_data(norm_sample, delta = 0.01)
+  
+  # --- Normal Processing ---
+  norm_clust_res <- clusters(norm_sample) 
+  
+  norm_summ_list[[i]] <- summary(norm_sample)
+  norm_kurtosis[i] <- kurtosis(norm_sample)
+  norm_avg_cluster_size[i] <- mean(norm_clust_res$cluster_size)
+  norm_avg_cluster_count[i] <- nrow(norm_clust_res)
+  norm_avg_cluster_length[i] <- mean(norm_clust_res$cluster_length)
+  
+  # --- Nidali Processing ---
+  nidali_clust_res <- clusters(nidali_sample)
+  
+  nidali_summ_list[[i]] <- summary(nidali_sample)
+  nidali_kurtosis[i] <- kurtosis(nidali_sample)
+  nidali_avg_cluster_size[i] <- mean(nidali_clust_res$cluster_size)
+  nidali_avg_cluster_count[i] <- nrow(nidali_clust_res)
+  nidali_avg_cluster_length[i] <- mean(nidali_clust_res$cluster_length)
+  
+  # --- Akkaya Processing ---
+  akkaya_clust_res <- clusters(akkaya_sample)
+  
+  akkaya_summ_list[[i]] <- summary(akkaya_sample)
+  akkaya_kurtosis[i] <- kurtosis(akkaya_sample)
+  akkaya_avg_cluster_size[i] <- mean(akkaya_clust_res$cluster_size)
+  akkaya_avg_cluster_count[i] <- nrow(akkaya_clust_res)
+  akkaya_avg_cluster_length[i] <- mean(akkaya_clust_res$cluster_length)
+}
+
+norm_summary_df <- bind_rows(norm_summ_list)
+nidali_summary_df <- bind_rows(nidali_summ_list)
+akkaya_summary_df <- bind_rows(akkaya_summ_list)
+
+
+exp_sample <- rexp(100, rate=1/30)
+nidali_exp_sample <- inject_inlier(exp_sample, 0.1)
 akkaya_exp_sample <- generate_contaminated_data(exp_sample, delta=0.8)
 
 hist(exp_sample)
 hist(exp_sample)
-hist(Nidali_exp_sample)
+hist(nidali_exp_sample)
 hist(akkaya_exp_sample)
-compare_dists(exp_sample, Nidali_exp_sample)
+compare_dists(exp_sample, nidali_exp_sample)
 compare_dists(exp_sample, akkaya_exp_sample)
-sapply(list(exp_sample, Nidali_exp_sample, akkaya_exp_sample), kurtosis)
+sapply(list(exp_sample, nidali_exp_sample, akkaya_exp_sample), kurtosis)
 
-############## NIDA'S SAMPLE
+
+
+
+############## NIDA'S SAMPLE ##################
 
 exam_score_df <- read.csv("data/student_exam_scores.csv")
 scores <- exam_score_df$exam_score

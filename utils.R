@@ -139,7 +139,8 @@ clusters <- function(sample) {
   # Find the number of connected data points
   clusters_df <- data.frame(lower_boundary = numeric(0),
                             upper_boundary = numeric(0),
-                            cluster_size = numeric(0))
+                            cluster_size = numeric(0),
+                            cluster_length = numeric())
   c_size <- 0
   next_point_index <- 0
   for (point_index in 1:(n-3)) {
@@ -170,7 +171,8 @@ clusters <- function(sample) {
             clusters_df <- add_row(clusters_df, 
                                    lower_boundary=cluster_boundaries[1],
                                    upper_boundary=cluster_boundaries[2],
-                                   cluster_size = c_size)
+                                   cluster_size = c_size,
+                                   cluster_length = cluster_boundaries[2] - cluster_boundaries[1])
           }
           break
         }
