@@ -27,7 +27,7 @@ akkaya_summ_list <- vector("list", N)
 for (i in 1:N) {
   
   # --- Generation ---
-  norm_sample <- rnorm(100)
+  norm_sample <- rnorm(250)
   nidali_sample <- inject_inlier(original_data = norm_sample, 0.1)
   akkaya_sample <- generate_contaminated_data(norm_sample, delta = 0.01)
   
@@ -62,6 +62,10 @@ for (i in 1:N) {
 norm_summary_df <- bind_rows(norm_summ_list)
 nidali_summary_df <- bind_rows(nidali_summ_list)
 akkaya_summary_df <- bind_rows(akkaya_summ_list)
+
+plot_and_quant(norm_avg_cluster_size, nidali_avg_cluster_size)
+################# END ###########################
+
 
 norm_sample <- rnorm(100)
 nidali_sample <- inject_inlier(original_data=norm_sample, 0.1)
@@ -115,7 +119,7 @@ akkaya_summ_list <- vector("list", N)
 for (i in 1:N) {
   
   # --- Generation ---
-  norm_sample <- rexp(100)
+  norm_sample <- rexp(250)
   nidali_sample <- inject_inlier(original_data = norm_sample, 0.1)
   akkaya_sample <- generate_contaminated_data(norm_sample, delta = 0.01)
   
@@ -150,6 +154,10 @@ for (i in 1:N) {
 norm_summary_df <- bind_rows(norm_summ_list)
 nidali_summary_df <- bind_rows(nidali_summ_list)
 akkaya_summary_df <- bind_rows(akkaya_summ_list)
+
+plot_and_quant(norm_avg_cluster_size, nidali_avg_cluster_size)
+plot_and_quant(norm_avg_cluster_size, akkaya_avg_cluster_size)
+################## THE END #################
 
 
 exp_sample <- rexp(100, rate=1/30)

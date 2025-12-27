@@ -1,28 +1,6 @@
 library(dplyr)
 library(ggplot2)
 
-# NidAli Inlier Generation
-
-# inlier_gen <- function(mu, sigma, n=1000, min=-Inf, max=Inf) {
-#   inlier_sample <- rnorm(n*100, mu, sigma)
-#   
-#   index <- ifelse(between(inlier_sample, mu - sigma, mu + sigma) & between(inlier_sample, min, max), TRUE, FALSE)
-#   
-#   inlier_sample <- sample(inlier_sample[index], n) # replace = FALSE or TRUE?
-#   
-#   return(inlier_sample)
-# }
-
-# inject_inlier <- function(original_data, mu, sigma, ratio=0.1, min=-Inf, max=Inf) {
-#   n <- length(original_data)
-#   inliers <- inlier_gen(mu, sigma, n, min, max)
-#   
-#   u <- as.integer(runif(n) > ratio)
-#   contaminated_sample <- u * original_data + (1 - u) * inliers # after this step we lose trace of inlier points
-#   
-#   return(contaminated_sample)
-# }
-
 
 inject_inlier <- function(original_data, ratio=0.1) {
   n <- length(original_data)
@@ -203,4 +181,12 @@ compare_dists <- function(before_injection, after_injection) {
   lines(after_dens, col = "red", lwd = 2)
   
   legend("topright", legend = c("before", "after"), col = c("blue", "red"), lwd = 2)
+}
+
+plot_and_quant <- function(original_cluster_size, injected_cluster_size) {
+  plot(density(original_cluster_size, na.rm = T), col = "blue", lwd=2)
+  lines(density(injected_cluster_size, na.rm = T), col = "red", lwd=2)
+  
+  print(quantile(original_cluster_size, na.rm = T, prob=seq(0, 1, 0.1)))
+  print(quantile(injected_cluster_size, na.rm = T, prob=seq(0, 1, 0.1)))
 }
